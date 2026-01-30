@@ -1,35 +1,26 @@
 #!/bin/bash
-
-APP_NAME=shopping-cart
-JAR_NAME=shopping-cart-0.0.1-SNAPSHOT.jar
-
-WORKSPACE_JAR=/var/snap/jenkins/4983/workspace/EKART-MULTIBRANCH_develop/target/$JAR_NAME
-DEPLOY_DIR=/opt/ekart/app
-LOG_DIR=/opt/ekart/logs
-JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+set -e
 
 echo "==============================="
 echo " Deploying EKART to DEV "
 echo "==============================="
 
-mkdir -p $DEPLOY_DIR $LOG_DIR
+APP_DIR="/opt/ekart/app"
+JAR_NAME="shopping-cart-0.0.1-SNAPSHOT.jar"
 
-echo "Stopping existing app (if any)..."
-pkill -f $APP_NAME || true
-sleep 3
+echo "Stopping service..."
+sudo systemctl stop ekart-dev || true
 
-echo "Copying JAR to runtime directory..."
-cp $WORKSPACE_JAR $DEPLOY_DIR/
+echo "Copying JAR..."
+sudo cp target/${JAR_NAME} ${APP_DIR}/
 
-echo "Starting app..."
-nohup $JAVA_HOME/bin/java \
-  -jar $DEPLOY_DIR/$JAR_NAME \
-  --spring.profiles.active=dev \
-  > $LOG_DIR/ekart-dev.log 2>&1 &
+echo "Setting permissions..."
+sudo chown root:root ${APP_DIR}/${JAR_NAME}
 
-sleep 5
+echo "Starting service..."
+sudo systemctl start ekart-dev
 
-echo "Checking running process..."
-ps -ef | grep $APP_NAME | grep -v grep
+echo "Checking status..."
+sudo systemctl status ekart-dev --no-pager
 
-echo "EKART DEV started on port 8081"
+echo "EKART DEV deployed successfully 🚀"
