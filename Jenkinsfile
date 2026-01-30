@@ -18,19 +18,20 @@ pipeline {
                     branch: "${env.BRANCH_NAME}"
             }
         }
-
-        stage('Set Environment') {
-            steps {
-                script {
-                    if (env.BRANCH_NAME == 'develop') {
-                        env.APP_ENV = 'dev'
-                    } else if (env.BRANCH_NAME == 'uat') {
-                        env.APP_ENV = 'uat'
-                    }
-                }
-                echo "Environment selected: ${APP_ENV}"
+stage('Set Environment') {
+    steps {
+        script {
+            if (env.BRANCH_NAME == 'develop') {
+                env.APP_ENV = 'dev'
+            } else if (env.BRANCH_NAME == 'uat') {
+                env.APP_ENV = 'uat'
+            } else {
+                error "No environment mapped for branch ${env.BRANCH_NAME}"
             }
         }
+        echo "Environment selected: ${APP_ENV}"
+    }
+}
 
         stage('Build') {
             steps {
