@@ -7,7 +7,7 @@ pipeline {
     }
 
     environment {
-        APP_ENV = ''
+        APP_ENV = 'dev'   // default value (safe)
     }
 
     stages {
@@ -18,20 +18,21 @@ pipeline {
                     branch: "${env.BRANCH_NAME}"
             }
         }
-stage('Set Environment') {
-    steps {
-        script {
-            if (env.BRANCH_NAME == 'develop') {
-                env.APP_ENV = 'dev'
-            } else if (env.BRANCH_NAME == 'uat') {
-                env.APP_ENV = 'uat'
-            } else {
-                error "No environment mapped for branch ${env.BRANCH_NAME}"
+
+        stage('Set Environment') {
+            steps {
+                script {
+                    if (env.BRANCH_NAME == 'develop') {
+                        env.APP_ENV = 'dev'
+                    } else if (env.BRANCH_NAME == 'uat') {
+                        env.APP_ENV = 'uat'
+                    } else {
+                        error "No environment mapped for branch ${env.BRANCH_NAME}"
+                    }
+                }
+                echo "Environment selected: ${env.APP_ENV}"
             }
         }
-        echo "Environment selected: ${APP_ENV}"
-    }
-}
 
         stage('Build') {
             steps {
@@ -48,7 +49,7 @@ stage('Set Environment') {
             }
             steps {
                 sh 'chmod +x scripts/*.sh'
-                sh "./scripts/deploy-${APP_ENV}.sh"
+                sh "./scripts/deploy-${env.APP_ENV}.sh"
             }
         }
     }
