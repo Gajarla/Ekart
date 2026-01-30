@@ -1,3 +1,3 @@
 #!/bin/bash
 echo "Deploying EKART to UAT"
-java -jar target/*.jar --spring.profiles.active=uat
+java -jar target/*.jar
