@@ -1,25 +1,35 @@
 #!/bin/bash
 
-JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
-JAR_PATH=/var/snap/jenkins/4983/workspace/EKART-MULTIBRANCH_develop/target
-LOG_PATH=/var/log/ekart
+APP_NAME=shopping-cart
+JAR_NAME=shopping-cart-0.0.1-SNAPSHOT.jar
 
-mkdir -p $LOG_PATH
+WORKSPACE_JAR=/var/snap/jenkins/4983/workspace/EKART-MULTIBRANCH_develop/target/$JAR_NAME
+DEPLOY_DIR=/opt/ekart/app
+LOG_DIR=/opt/ekart/logs
+JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 
 echo "==============================="
 echo " Deploying EKART to DEV "
 echo "==============================="
 
-echo "Stopping existing app..."
-pkill -f shopping-cart || true
-sleep 2
+mkdir -p $DEPLOY_DIR $LOG_DIR
 
-echo "Starting app with Java 8..."
+echo "Stopping existing app (if any)..."
+pkill -f $APP_NAME || true
+sleep 3
+
+echo "Copying JAR to runtime directory..."
+cp $WORKSPACE_JAR $DEPLOY_DIR/
+
+echo "Starting app..."
 nohup $JAVA_HOME/bin/java \
--jar $JAR_PATH/shopping-cart-0.0.1-SNAPSHOT.jar \
-> $LOG_PATH/ekart-dev.log 2>&1 &
+  -jar $DEPLOY_DIR/$JAR_NAME \
+  --spring.profiles.active=dev \
+  > $LOG_DIR/ekart-dev.log 2>&1 &
 
 sleep 5
-ps -ef | grep shopping-cart | grep -v grep
+
+echo "Checking running process..."
+ps -ef | grep $APP_NAME | grep -v grep
 
 echo "EKART DEV started on port 8081"
